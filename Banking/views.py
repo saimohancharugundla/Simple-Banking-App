@@ -18,14 +18,16 @@ def transfer(request):
         sender = request.POST['sendername']
         receiver = request.POST['receivername']
         tamount = request.POST['tamount']
-        
         if Customers.objects.filter(cust_name=sender).exists():
             if Customers.objects.filter(cust_name=receiver).exists():
-                dt = datetime.datetime.now()
-                Customers.objects.filter(cust_name=sender).update(amount=F('amount')-tamount,transactions=dt)
-                Customers.objects.filter(cust_name=receiver).update(amount=F('amount')+tamount)
-                messages.success(request,'Transaction Successful')
-                
+                cus = Customers.objects.get(cust_name=sender)
+                if (int(tamount)<= int(cus.amount)):
+                    dt = datetime.datetime.now()
+                    Customers.objects.filter(cust_name=sender).update(amount=F('amount')-tamount,transactions=dt)
+                    Customers.objects.filter(cust_name=receiver).update(amount=F('amount')+tamount)
+                    messages.success(request,'Transaction Successful')
+                else:
+                    messages.error(request,"Transaction failed! Not enough amount to transfer")
             else:
                 messages.warning(request,'Receiver does not exists')
         else:
